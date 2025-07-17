@@ -12,7 +12,7 @@
 export const resources = [
   {
     name: 'get_components',
-    description: 'List of available shadcn/ui components that can be used in the project',
+    description: 'List of available shadcn-svelte components that can be used in the project',
     uri: 'resource:get_components',
     contentType: 'text/plain',
   }
@@ -20,12 +20,12 @@ export const resources = [
 
 /**
  * Handler for the get_components resource
- * @returns List of available shadcn/ui components
+ * @returns List of available shadcn-svelte components
  */
 const getComponentsList = async () => {
   try {
-    // List of available components in shadcn/ui
-    // This hardcoded list can be updated in the future if needed
+    // List of available components in shadcn-svelte
+    // This list matches the components available at https://shadcn-svelte.com/docs/components
     const components = [
       "accordion",
       "alert",
@@ -38,8 +38,10 @@ const getComponentsList = async () => {
       "calendar",
       "card",
       "carousel",
+      "chart",
       "checkbox",
       "collapsible",
+      "combobox",
       "command",
       "context-menu",
       "data-table",
@@ -47,9 +49,10 @@ const getComponentsList = async () => {
       "dialog",
       "drawer",
       "dropdown-menu",
-      "form",
+      "formsnap",
       "hover-card",
       "input",
+      "input-otp",
       "label",
       "menubar",
       "navigation-menu",
@@ -57,11 +60,13 @@ const getComponentsList = async () => {
       "popover",
       "progress",
       "radio-group",
+      "range-calendar",
       "resizable",
       "scroll-area",
       "select",
       "separator",
       "sheet",
+      "sidebar",
       "skeleton",
       "slider",
       "sonner",
@@ -69,10 +74,10 @@ const getComponentsList = async () => {
       "table",
       "tabs",
       "textarea",
-      "toast",
       "toggle",
       "toggle-group",
-      "tooltip"
+      "tooltip",
+      "typography"
     ];
     
     return {

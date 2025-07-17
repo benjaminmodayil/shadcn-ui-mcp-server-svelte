@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 /**
- * Shadcn UI v4 MCP Server
+ * Shadcn-Svelte MCP Server
  * 
- * A Model Context Protocol server for shadcn/ui v4 components.
- * Provides AI assistants with access to component source code, demos, blocks, and metadata.
+ * A Model Context Protocol server for shadcn-svelte components.
+ * Provides AI assistants with access to component source code, documentation, and metadata for Svelte 5 and SvelteKit projects.
  * 
  * Usage:
- *   npx shadcn-ui-mcp-server
- *   npx shadcn-ui-mcp-server --github-api-key YOUR_TOKEN
- *   npx shadcn-ui-mcp-server -g YOUR_TOKEN
+ *   npx @benjaminmodayil/shadcn-svelte-mcp-server
+ *   npx @benjaminmodayil/shadcn-svelte-mcp-server --github-api-key YOUR_TOKEN
+ *   npx @benjaminmodayil/shadcn-svelte-mcp-server -g YOUR_TOKEN
  */
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
@@ -24,10 +24,10 @@ async function parseArgs() {
   // Help flag
   if (args.includes('--help') || args.includes('-h')) {
     console.log(`
-Shadcn UI v4 MCP Server
+Shadcn-Svelte MCP Server
 
 Usage:
-  npx shadcn-ui-mcp-server [options]
+  npx @benjaminmodayil/shadcn-svelte-mcp-server [options]
 
 Options:
   --github-api-key, -g <token>    GitHub Personal Access Token for API access
@@ -35,14 +35,14 @@ Options:
   --version, -v                   Show version information
 
 Examples:
-  npx shadcn-ui-mcp-server
-  npx shadcn-ui-mcp-server --github-api-key ghp_your_token_here
-  npx shadcn-ui-mcp-server -g ghp_your_token_here
+  npx @benjaminmodayil/shadcn-svelte-mcp-server
+  npx @benjaminmodayil/shadcn-svelte-mcp-server --github-api-key ghp_your_token_here
+  npx @benjaminmodayil/shadcn-svelte-mcp-server -g ghp_your_token_here
 
 Environment Variables:
   GITHUB_PERSONAL_ACCESS_TOKEN    Alternative way to provide GitHub token
 
-For more information, visit: https://github.com/yourusername/shadcn-ui-mcp-server
+For more information, visit: https://github.com/benjaminmodayil/shadcn-svelte-mcp-server
 `);
     process.exit(0);
   }
@@ -61,9 +61,9 @@ For more information, visit: https://github.com/yourusername/shadcn-ui-mcp-serve
       
       const packageContent = fs.readFileSync(packagePath, 'utf8');
       const packageJson = JSON.parse(packageContent);
-      console.log(`shadcn-ui-mcp-server v${packageJson.version}`);
+      console.log(`shadcn-svelte-mcp-server v${packageJson.version}`);
     } catch (error) {
-      console.log('shadcn-ui-mcp-server v1.0.0');
+      console.log('shadcn-svelte-mcp-server v1.0.0');
     }
     process.exit(0);
   }
@@ -100,7 +100,7 @@ async function main() {
     // Initialize the MCP server with metadata and capabilities
     const server = new Server(
       {
-        name: "shadcn-ui-mcp-server",
+        name: "shadcn-svelte-mcp-server",
         version: "1.0.0",
       },
       {
@@ -119,7 +119,7 @@ async function main() {
     const transport = new StdioServerTransport();
     await server.connect(transport);
     
-    console.error('Shadcn UI v4 MCP Server started successfully');
+    console.error('Shadcn-Svelte MCP Server started successfully');
   } catch (error) {
     console.error('Failed to start server:', error);
     process.exit(1);

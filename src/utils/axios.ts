@@ -1,12 +1,13 @@
 import { Axios } from "axios";
+import { registry } from './registry.js';
 
-// Constants for the v4 repository structure
-const REPO_OWNER = 'shadcn-ui';
-const REPO_NAME = 'ui';
+// Constants for shadcn-svelte repository
+const REPO_OWNER = 'huntabyte';
+const REPO_NAME = 'shadcn-svelte';
 const REPO_BRANCH = 'main';
-const V4_BASE_PATH = 'apps/v4';
-const REGISTRY_PATH = `${V4_BASE_PATH}/registry`;
-const NEW_YORK_V4_PATH = `${REGISTRY_PATH}/new-york-v4`;
+
+// Note: shadcn-svelte uses a registry-based system, not direct file access
+// Components are managed through the registry API
 
 // GitHub API for accessing repository structure and metadata
 const githubApi = new Axios({
@@ -29,98 +30,75 @@ const githubApi = new Axios({
     }],
 });
 
-// GitHub Raw for directly fetching file contents
+// GitHub Raw for documentation/examples (shadcn-svelte uses different structure)
 const githubRaw = new Axios({
     baseURL: `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${REPO_BRANCH}`,
     headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; ShadcnUiMcpServer/1.0.0)",
+        "User-Agent": "Mozilla/5.0 (compatible; ShadcnSvelteMcpServer/1.0.0)",
     },
-    timeout: 30000, // Increased from 15000 to 30000 (30 seconds)
+    timeout: 30000,
     transformResponse: [(data) => data], // Return raw data
 });
 
 /**
- * Fetch component source code from the v4 registry
+ * Fetch component source code from the shadcn-svelte registry
  * @param componentName Name of the component
  * @returns Promise with component source code
  */
 async function getComponentSource(componentName: string): Promise<string> {
-    const componentPath = `${NEW_YORK_V4_PATH}/ui/${componentName.toLowerCase()}.tsx`;
-    
     try {
-        const response = await githubRaw.get(`/${componentPath}`);
-        return response.data;
+        return await registry.getComponentSource(componentName);
     } catch (error) {
-        throw new Error(`Component "${componentName}" not found in v4 registry`);
+        throw new Error(`Component "${componentName}" not found in shadcn-svelte registry`);
     }
 }
 
 /**
- * Fetch component demo/example from the v4 registry
+ * Fetch component demo/example - Note: shadcn-svelte demos are on the docs site
  * @param componentName Name of the component
- * @returns Promise with component demo code
+ * @returns Promise with component usage information
  */
 async function getComponentDemo(componentName: string): Promise<string> {
-    const demoPath = `${NEW_YORK_V4_PATH}/examples/${componentName.toLowerCase()}-demo.tsx`;
-    
+    // shadcn-svelte doesn't store demos in the main repo
+    // Return usage information instead
     try {
-        const response = await githubRaw.get(`/${demoPath}`);
-        return response.data;
+        const context = await registry.getComponentContext(componentName);
+        return context + '\n\nFor full examples, visit: https://shadcn-svelte.com/docs/components/' + componentName;
     } catch (error) {
-        throw new Error(`Demo for component "${componentName}" not found in v4 registry`);
+        throw new Error(`Component "${componentName}" not found in shadcn-svelte registry`);
     }
 }
 
 /**
- * Fetch all available components from the registry
+ * Fetch all available components from the shadcn-svelte registry
  * @returns Promise with list of component names
  */
 async function getAvailableComponents(): Promise<string[]> {
     try {
-        const response = await githubApi.get(`/repos/${REPO_OWNER}/${REPO_NAME}/contents/${NEW_YORK_V4_PATH}/ui`);
-        return response.data
-            .filter((item: any) => item.type === 'file' && item.name.endsWith('.tsx'))
-            .map((item: any) => item.name.replace('.tsx', ''));
+        return await registry.getAvailableComponents();
     } catch (error) {
-        throw new Error('Failed to fetch available components');
+        throw new Error('Failed to fetch available components from shadcn-svelte registry');
     }
 }
 
 /**
- * Fetch component metadata from the registry
+ * Fetch component metadata from the shadcn-svelte registry
  * @param componentName Name of the component
  * @returns Promise with component metadata
  */
 async function getComponentMetadata(componentName: string): Promise<any> {
     try {
-        const response = await githubRaw.get(`/${REGISTRY_PATH}/registry-ui.ts`);
-        const registryContent = response.data;
+        const component = await registry.getComponent(componentName);
+        if (!component) return null;
         
-        // Parse component metadata using a more robust approach
-        const componentRegex = new RegExp(`{[^}]*name:\\s*["']${componentName}["'][^}]*}`, 'gs');
-        const match = registryContent.match(componentRegex);
-        
-        if (!match) {
-            return null;
-        }
-        
-        const componentData = match[0];
-        
-        // Extract metadata
-        const nameMatch = componentData.match(/name:\s*["']([^"']+)["']/);
-        const typeMatch = componentData.match(/type:\s*["']([^"']+)["']/);
-        const dependenciesMatch = componentData.match(/dependencies:\s*\[([^\]]*)\]/s);
-        const registryDepsMatch = componentData.match(/registryDependencies:\s*\[([^\]]*)\]/s);
-        
+        // Transform to match expected format
         return {
-            name: nameMatch?.[1] || componentName,
-            type: typeMatch?.[1] || 'registry:ui',
-            dependencies: dependenciesMatch?.[1] 
-                ? dependenciesMatch[1].split(',').map((dep: string) => dep.trim().replace(/["']/g, ''))
-                : [],
-            registryDependencies: registryDepsMatch?.[1]
-                ? registryDepsMatch[1].split(',').map((dep: string) => dep.trim().replace(/["']/g, ''))
-                : [],
+            name: component.name,
+            type: component.type,
+            dependencies: component.dependencies || [],
+            registryDependencies: component.registryDependencies || [],
+            description: component.description,
+            files: component.files
         };
     } catch (error) {
         console.error(`Error getting metadata for ${componentName}:`, error);
@@ -139,7 +117,7 @@ async function getComponentMetadata(componentName: string): Promise<any> {
 async function buildDirectoryTree(
     owner: string = REPO_OWNER,
     repo: string = REPO_NAME,
-    path: string = NEW_YORK_V4_PATH,
+    path: string = 'packages',
     branch: string = REPO_BRANCH
 ): Promise<any> {
     try {
@@ -249,38 +227,29 @@ async function buildDirectoryTree(
 }
 
 /**
- * Provides a basic directory structure for v4 registry without API calls
+ * Provides a basic directory structure for shadcn-svelte without API calls
  * This is used as a fallback when API rate limits are hit
  */
-function getBasicV4Structure(): any {
+function getBasicSvelteStructure(): any {
     return {
-        path: NEW_YORK_V4_PATH,
+        path: 'packages',
         type: 'directory',
         note: 'Basic structure provided due to API limitations',
         children: {
-            'ui': {
-                path: `${NEW_YORK_V4_PATH}/ui`,
+            'cli': {
+                path: 'packages/cli',
                 type: 'directory',
-                description: 'Contains all v4 UI components',
-                note: 'Component files (.tsx) are located here'
+                description: 'shadcn-svelte CLI tool',
+                note: 'Command-line interface for adding components'
             },
-            'examples': {
-                path: `${NEW_YORK_V4_PATH}/examples`,
+            'registry': {
+                path: 'packages/registry',
                 type: 'directory', 
-                description: 'Contains component demo examples',
-                note: 'Demo files showing component usage'
-            },
-            'hooks': {
-                path: `${NEW_YORK_V4_PATH}/hooks`,
-                type: 'directory',
-                description: 'Contains custom React hooks'
-            },
-            'lib': {
-                path: `${NEW_YORK_V4_PATH}/lib`,
-                type: 'directory',
-                description: 'Contains utility libraries and functions'
+                description: 'Component registry and metadata',
+                note: 'Registry system for component definitions'
             }
-        }
+        },
+        additional_info: 'Components are installed to your project at $lib/components/ui/'
     };
 }
 
@@ -314,20 +283,21 @@ function extractBlockDescription(code: string): string | null {
 }
 
 /**
- * Extract dependencies from import statements
+ * Extract dependencies from import statements (Svelte-aware)
  * @param code The source code to analyze
  * @returns Array of dependency names
  */
 function extractDependencies(code: string): string[] {
     const dependencies: string[] = [];
     
-    // Match import statements
-    const importRegex = /import\s+.*?\s+from\s+['"]([@\w\/\-\.]+)['"]/g;
+    // Match import statements (including $lib aliases)
+    const importRegex = /import\s+.*?\s+from\s+['"]([@$\w\/\-\.]+)['"]/g;
     let match;
     
     while ((match = importRegex.exec(code)) !== null) {
         const dep = match[1];
-        if (!dep.startsWith('./') && !dep.startsWith('../') && !dep.startsWith('@/')) {
+        // Exclude relative imports and $lib aliases (SvelteKit convention)
+        if (!dep.startsWith('./') && !dep.startsWith('../') && !dep.startsWith('$lib/') && !dep.startsWith('$app/')) {
             dependencies.push(dep);
         }
     }
@@ -336,33 +306,25 @@ function extractDependencies(code: string): string[] {
 }
 
 /**
- * Extract component usage from code
+ * Extract component usage from code (Svelte-aware)
  * @param code The source code to analyze
  * @returns Array of component names used
  */
 function extractComponentUsage(code: string): string[] {
-    const components: string[] = [];
+    const patterns = registry.extractSveltePatterns(code);
     
-    // Extract from imports of components (assuming they start with capital letters)
-    const importRegex = /import\s+\{([^}]+)\}\s+from/g;
-    let match;
-    
-    while ((match = importRegex.exec(code)) !== null) {
-        const imports = match[1].split(',').map(imp => imp.trim());
-        imports.forEach(imp => {
-            if (imp[0] && imp[0] === imp[0].toUpperCase()) {
-                components.push(imp);
-            }
-        });
-    }
-    
-    // Also look for JSX components in the code
-    const jsxRegex = /<([A-Z]\w+)/g;
-    while ((match = jsxRegex.exec(code)) !== null) {
-        components.push(match[1]);
-    }
-    
-    return [...new Set(components)]; // Remove duplicates
+    // Return unique component names
+    return [...new Set([
+        ...patterns.components,
+        // Also include imported components
+        ...patterns.imports
+            .filter(imp => imp.includes('$lib/components/'))
+            .map(imp => {
+                const match = imp.match(/\/([^/]+)$/);
+                return match ? match[1] : '';
+            })
+            .filter(Boolean)
+    ])];
 }
 
 /**
@@ -403,16 +365,16 @@ function generateComplexBlockUsage(blockName: string, structure: any[]): string 
 async function buildDirectoryTreeWithFallback(
     owner: string = REPO_OWNER,
     repo: string = REPO_NAME,
-    path: string = NEW_YORK_V4_PATH,
+    path: string = 'packages',
     branch: string = REPO_BRANCH
 ): Promise<any> {
     try {
         return await buildDirectoryTree(owner, repo, path, branch);
     } catch (error: any) {
-        // If it's a rate limit error and we're asking for the default v4 path, provide fallback
-        if (error.message && error.message.includes('rate limit') && path === NEW_YORK_V4_PATH) {
+        // If it's a rate limit error, provide fallback
+        if (error.message && error.message.includes('rate limit')) {
             console.warn('Using fallback directory structure due to rate limit');
-            return getBasicV4Structure();
+            return getBasicSvelteStructure();
         }
         // Re-throw other errors
         throw error;
@@ -420,13 +382,31 @@ async function buildDirectoryTreeWithFallback(
 }
 
 /**
- * Fetch block code from the v4 blocks directory
- * @param blockName Name of the block (e.g., "calendar-01", "dashboard-01")
- * @param includeComponents Whether to include component files for complex blocks
- * @returns Promise with block code and structure
+ * Note: shadcn-svelte doesn't have blocks like the React version
+ * This function is kept for compatibility but returns component information instead
  */
 async function getBlockCode(blockName: string, includeComponents: boolean = true): Promise<any> {
-    const blocksPath = `${NEW_YORK_V4_PATH}/blocks`;
+    // For compatibility, treat block requests as component requests
+    return {
+        error: 'Blocks are not available in shadcn-svelte',
+        suggestion: 'Use the list_components and get_component tools instead',
+        info: 'shadcn-svelte provides individual components that can be composed together'
+    };
+}
+
+// Stub function for compatibility
+async function getAvailableBlocks(category?: string): Promise<any> {
+    return {
+        error: 'Blocks are not available in shadcn-svelte',
+        suggestion: 'Use the list_components tool to see available components',
+        info: 'shadcn-svelte provides individual components rather than pre-built blocks',
+        availableComponents: await registry.getAvailableComponents()
+    };
+}
+
+// Original block function removed - keeping stubs above for compatibility
+async function _removedGetBlockCode(blockName: string, includeComponents: boolean = true): Promise<any> {
+    const blocksPath = 'removed';
     
     try {
         // First, check if it's a simple block file (.tsx)
@@ -579,13 +559,9 @@ async function getBlockCode(blockName: string, includeComponents: boolean = true
     }
 }
 
-/**
- * Get all available blocks with categorization
- * @param category Optional category filter
- * @returns Promise with categorized block list
- */
-async function getAvailableBlocks(category?: string): Promise<any> {
-    const blocksPath = `${NEW_YORK_V4_PATH}/blocks`;
+// Removed duplicate - see stub function above
+async function _removedGetAvailableBlocks(category?: string): Promise<any> {
+    const blocksPath = 'removed';
     
     try {
         const response = await githubApi.get(`/repos/${REPO_OWNER}/${REPO_NAME}/contents/${blocksPath}?ref=${REPO_BRANCH}`);
@@ -743,17 +719,16 @@ export const axios = {
     getComponentDemo,
     getAvailableComponents,
     getComponentMetadata,
-    getBlockCode,
-    getAvailableBlocks,
+    getBlockCode, // Kept for compatibility - returns error message
+    getAvailableBlocks, // Kept for compatibility - returns error message
     setGitHubApiKey,
     getGitHubRateLimit,
+    // Registry functions (new)
+    registry,
     // Path constants for easy access
     paths: {
         REPO_OWNER,
         REPO_NAME,
-        REPO_BRANCH,
-        V4_BASE_PATH,
-        REGISTRY_PATH,
-        NEW_YORK_V4_PATH
+        REPO_BRANCH
     }
 }
