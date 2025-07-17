@@ -408,7 +408,7 @@ Key changes:
 ### `package.json` Updates:
 ```json
 {
-  "name": "@benjaminmodayil/shadcn-svelte-mcp-server",
+  "name": "shadcn-svelte-mcp-server",
   "description": "MCP server for integrating shadcn-svelte components with Claude Desktop",
   "keywords": ["mcp", "shadcn-svelte", "svelte", "sveltekit", "components"],
   "repository": {

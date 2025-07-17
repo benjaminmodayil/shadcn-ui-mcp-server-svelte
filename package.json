@@ -1,5 +1,5 @@
 {
-  "name": "@benjaminmodayil/shadcn-svelte-mcp-server",
+  "name": "shadcn-svelte-mcp-server",
   "version": "1.0.0",
   "description": "A Model Context Protocol (MCP) server for shadcn-svelte components, providing AI assistants with access to component source code, documentation, and metadata for Svelte 5 and SvelteKit projects.",
   "type": "module",

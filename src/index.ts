@@ -6,9 +6,9 @@
  * Provides AI assistants with access to component source code, documentation, and metadata for Svelte 5 and SvelteKit projects.
  * 
  * Usage:
- *   npx @benjaminmodayil/shadcn-svelte-mcp-server
- *   npx @benjaminmodayil/shadcn-svelte-mcp-server --github-api-key YOUR_TOKEN
- *   npx @benjaminmodayil/shadcn-svelte-mcp-server -g YOUR_TOKEN
+ *   node build/index.js
+ *   node build/index.js --github-api-key YOUR_TOKEN
+ *   node build/index.js -g YOUR_TOKEN
  */
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
@@ -27,7 +27,7 @@ async function parseArgs() {
 Shadcn-Svelte MCP Server
 
 Usage:
-  npx @benjaminmodayil/shadcn-svelte-mcp-server [options]
+  node build/index.js [options]
 
 Options:
   --github-api-key, -g <token>    GitHub Personal Access Token for API access
@@ -35,9 +35,9 @@ Options:
   --version, -v                   Show version information
 
 Examples:
-  npx @benjaminmodayil/shadcn-svelte-mcp-server
-  npx @benjaminmodayil/shadcn-svelte-mcp-server --github-api-key ghp_your_token_here
-  npx @benjaminmodayil/shadcn-svelte-mcp-server -g ghp_your_token_here
+  node build/index.js
+  node build/index.js --github-api-key ghp_your_token_here
+  node build/index.js -g ghp_your_token_here
 
 Environment Variables:
   GITHUB_PERSONAL_ACCESS_TOKEN    Alternative way to provide GitHub token

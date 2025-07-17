@@ -1,6 +1,6 @@
 # Shadcn-Svelte MCP Server
 
-[![npm version](https://badge.fury.io/js/@benjaminmodayil%2Fshadcn-svelte-mcp-server.svg)](https://badge.fury.io/js/@benjaminmodayil%2Fshadcn-svelte-mcp-server)
+<!-- [![npm version](https://badge.fury.io/js/shadcn-svelte-mcp-server.svg)](https://badge.fury.io/js/shadcn-svelte-mcp-server) -->
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A Model Context Protocol (MCP) server that provides AI assistants with comprehensive access to [shadcn-svelte](https://shadcn-svelte.com/) components, documentation, and metadata. This server enables AI tools like Claude Desktop, Continue.dev, and other MCP-compatible clients to retrieve and work with shadcn-svelte components for Svelte 5 and SvelteKit projects seamlessly.
@@ -21,21 +21,25 @@ A Model Context Protocol (MCP) server that provides AI assistants with comprehen
 The fastest way to get started - no installation required!
 
 ```bash
+# Build the project first
+npm install
+npm run build
+
 # Basic usage
-npx @benjaminmodayil/shadcn-svelte-mcp-server
+node build/index.js
 
 # With GitHub token for better rate limits (5000 requests/hour)
-npx @benjaminmodayil/shadcn-svelte-mcp-server --github-api-key ghp_your_token_here
+node build/index.js --github-api-key ghp_your_token_here
 
 # Short form
-npx @benjaminmodayil/shadcn-svelte-mcp-server -g ghp_your_token_here
+node build/index.js -g ghp_your_token_here
 
 # Using environment variable
 export GITHUB_PERSONAL_ACCESS_TOKEN=ghp_your_token_here
-npx @benjaminmodayil/shadcn-svelte-mcp-server
+node build/index.js
 ```
 
-**🎯 Try it now**: Run `npx @benjaminmodayil/shadcn-svelte-mcp-server --help` to see all options!
+**🎯 Try it now**: Run `node build/index.js --help` to see all options!
 
 ### 🔧 Command Line Options
 
@@ -51,10 +55,10 @@ Environment Variables:
   GITHUB_PERSONAL_ACCESS_TOKEN    Alternative way to provide GitHub token
 
 Examples:
-  npx @benjaminmodayil/shadcn-svelte-mcp-server --help
-  npx @benjaminmodayil/shadcn-svelte-mcp-server --version
-  npx @benjaminmodayil/shadcn-svelte-mcp-server -g ghp_1234567890abcdef
-  GITHUB_PERSONAL_ACCESS_TOKEN=ghp_token npx @benjaminmodayil/shadcn-svelte-mcp-server
+  node build/index.js --help
+  node build/index.js --version
+  node build/index.js -g ghp_1234567890abcdef
+  GITHUB_PERSONAL_ACCESS_TOKEN=ghp_token node build/index.js
 ```
 
 ## 🔑 GitHub API Token Setup
@@ -84,7 +88,8 @@ Examples:
 
 **Method 1: Command Line (Quick testing)**
 ```bash
-npx @jpisnice/shadcn-ui-mcp-server --github-api-key ghp_your_token_here
+# npx @jpisnice/shadcn-ui-mcp-server --github-api-key ghp_your_token_here
+node build/index.js --github-api-key ghp_your_token_here
 ```
 
 **Method 2: Environment Variable (Recommended)**
@@ -93,7 +98,7 @@ npx @jpisnice/shadcn-ui-mcp-server --github-api-key ghp_your_token_here
 export GITHUB_PERSONAL_ACCESS_TOKEN=ghp_your_token_here
 
 # Then simply run:
-npx @jpisnice/shadcn-ui-mcp-server
+node build/index.js
 ```
 
 **Method 3: Claude Desktop Configuration**
@@ -101,8 +106,8 @@ npx @jpisnice/shadcn-ui-mcp-server
 {
   "mcpServers": {
     "shadcn-ui": {
-      "command": "npx",
-      "args": ["@jpisnice/shadcn-ui-mcp-server"],
+      "command": "node",
+      "args": ["[LOCAL_PATH]/build/index.js"],
       "env": {
         "GITHUB_PERSONAL_ACCESS_TOKEN": "ghp_your_token_here"
       }
@@ -115,10 +120,12 @@ npx @jpisnice/shadcn-ui-mcp-server
 
 ```bash
 # Test without token (should show rate limit warning)
-npx @jpisnice/shadcn-ui-mcp-server --help
+# npx @jpisnice/shadcn-ui-mcp-server --help
+node build/index.js --help
 
 # Test with token (should show success message)
-npx @jpisnice/shadcn-ui-mcp-server --github-api-key ghp_your_token --help
+# npx @jpisnice/shadcn-ui-mcp-server --github-api-key ghp_your_token --help
+node build/index.js --github-api-key ghp_your_token --help
 
 # Check your current rate limit
 curl -H "Authorization: token ghp_your_token" https://api.github.com/rate_limit
@@ -167,14 +174,16 @@ The MCP server provides these tools for AI assistants:
 
 ## 🔗 Claude Desktop Integration
 
+**Note**: Since this package is not published to npm, you need to use local paths. Replace `[LOCAL_PATH]` with the absolute path to your local installation.
+
 Add to your Claude Desktop configuration (`~/.config/Claude/claude_desktop_config.json`):
 
 ```json
 {
   "mcpServers": {
     "shadcn-svelte": {
-      "command": "npx",
-      "args": ["@benjaminmodayil/shadcn-svelte-mcp-server", "--github-api-key", "ghp_your_token_here"]
+      "command": "node",
+      "args": ["[LOCAL_PATH]/build/index.js", "--github-api-key", "ghp_your_token_here"]
     }
   }
 }
@@ -186,8 +195,8 @@ Or with environment variable:
 {
   "mcpServers": {
     "shadcn-svelte": {
-      "command": "npx",
-      "args": ["@benjaminmodayil/shadcn-svelte-mcp-server"],
+      "command": "node",
+      "args": ["[LOCAL_PATH]/build/index.js"],
       "env": {
         "GITHUB_PERSONAL_ACCESS_TOKEN": "ghp_your_token_here"
       }
@@ -203,7 +212,7 @@ Or with environment variable:
 **"Rate limit exceeded" errors:**
 ```bash
 # Solution: Add GitHub API token
-npx @benjaminmodayil/shadcn-svelte-mcp-server --github-api-key ghp_your_token_here
+node build/index.js --github-api-key ghp_your_token_here
 ```
 
 **"Command not found" errors:**
@@ -216,7 +225,8 @@ npx --version   # Should work
 **Component not found:**
 ```bash
 # Check available components first
-npx @benjaminmodayil/shadcn-svelte-mcp-server
+# npx @benjaminmodayil/shadcn-svelte-mcp-server
+node build/index.js
 # Then call list_components tool via your MCP client
 ```
 
@@ -225,7 +235,8 @@ npx @benjaminmodayil/shadcn-svelte-mcp-server
 # Set proxy if needed
 export HTTP_PROXY=http://your-proxy:8080
 export HTTPS_PROXY=http://your-proxy:8080
-npx @benjaminmodayil/shadcn-svelte-mcp-server
+# npx @benjaminmodayil/shadcn-svelte-mcp-server
+node build/index.js
 ```
 
 ### Debug Mode
@@ -234,7 +245,8 @@ Enable verbose logging:
 
 ```bash
 # Set debug environment variable
-DEBUG=* npx @benjaminmodayil/shadcn-svelte-mcp-server --github-api-key ghp_your_token
+# DEBUG=* npx @benjaminmodayil/shadcn-svelte-mcp-server --github-api-key ghp_your_token
+DEBUG=* node build/index.js --github-api-key ghp_your_token
 ```
 
 ## 📄 License
