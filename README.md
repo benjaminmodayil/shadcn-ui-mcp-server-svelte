@@ -212,7 +212,9 @@ The MCP server provides these tools for AI assistants:
 }
 ```
 
-## 🔗 Claude Desktop Integration
+## 🔗 Integration with AI Tools
+
+### Claude Desktop Integration
 
 **Note**: Since this package is not published to npm, you need to use local paths. Replace `[LOCAL_PATH]` with the absolute path to your local installation.
 
@@ -244,6 +246,105 @@ Or with environment variable:
   }
 }
 ```
+
+### Claude Code (claude-code/cline) Integration
+
+For [Claude Code](https://github.com/cline/cline) (formerly Cline) VS Code extension, add to your MCP settings:
+
+**Option 1: In VS Code Settings**
+1. Open VS Code Settings (Cmd+, on Mac, Ctrl+, on Windows/Linux)
+2. Search for "claude code mcp" or "cline mcp"
+3. Add the server configuration:
+
+```json
+{
+  "claude-code.mcpServers": {
+    "shadcn-svelte": {
+      "command": "node",
+      "args": ["[LOCAL_PATH]/build/index.js"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "ghp_your_token_here"
+      }
+    }
+  }
+}
+```
+
+**Option 2: In .vscode/settings.json**
+Add to your workspace or user settings:
+
+```json
+{
+  "claude-code.mcpServers": {
+    "shadcn-svelte": {
+      "command": "node",
+      "args": ["/absolute/path/to/shadcn-ui-mcp-server-svelte/build/index.js"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "ghp_your_token_here"
+      }
+    }
+  }
+}
+```
+
+**Option 3: Using the Claude Code UI**
+1. Open Claude Code in VS Code
+2. Click on the settings/gear icon
+3. Navigate to MCP Servers section
+4. Add a new server with:
+   - Name: `shadcn-svelte`
+   - Command: `node`
+   - Arguments: `/path/to/your/shadcn-ui-mcp-server-svelte/build/index.js`
+   - Environment variables: `GITHUB_PERSONAL_ACCESS_TOKEN=ghp_your_token`
+
+### Continue.dev Integration
+
+For [Continue.dev](https://continue.dev/), add to your `~/.continue/config.json`:
+
+```json
+{
+  "mcpServers": [
+    {
+      "name": "shadcn-svelte",
+      "command": "node",
+      "args": ["[LOCAL_PATH]/build/index.js"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "ghp_your_token_here"
+      }
+    }
+  ]
+}
+```
+
+### Using the Tools in Your AI Assistant
+
+Once configured, you can ask your AI assistant to:
+
+**Get Components:**
+- "Show me the shadcn button component"
+- "Get the source code for the dialog component"
+- "What dependencies does the data-table component have?"
+
+**Generate UI Patterns:**
+- "Create a login form using shadcn components"
+- "Generate a responsive dashboard header"
+- "Build a profile card component with Svelte 5"
+
+**Create Custom Components:**
+- "Scaffold a new user-avatar component that extends the avatar component"
+- "Create a custom card component with compact and expanded variants"
+- "Build a new layout component for a sidebar navigation"
+
+The AI will use the appropriate MCP tools automatically to fulfill your requests.
+
+### Verifying Your Setup
+
+After adding the MCP server to your configuration:
+
+1. **Restart your AI tool** (Claude Desktop, VS Code, etc.)
+2. **Check if the server is loaded** - Your AI should be able to list available MCP tools
+3. **Test with a simple request**: "List all available shadcn-svelte components"
+4. **If working correctly**, you should see a list of components like accordion, alert, button, etc.
 
 ## 🐛 Troubleshooting
 
