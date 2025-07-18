@@ -1,4 +1,6 @@
 import { Axios } from "axios";
+import * as fs from "fs/promises";
+import * as path from "path";
 
 // Registry-based system for shadcn-svelte
 // Unlike the React version, shadcn-svelte uses a registry API
@@ -112,8 +114,18 @@ const SHADCN_SVELTE_COMPONENTS = [
 export class ShadcnSvelteRegistry {
   private cache = new RegistryCache();
   private httpClient: Axios;
+  private githubClient: Axios;
+  private registryIndex: RegistryIndex | null = null;
   
-  // Potential registry endpoints (to be discovered/configured)
+  // GitHub repository information
+  private readonly githubRepo = {
+    owner: "huntabyte",
+    repo: "shadcn-svelte",
+    branch: "main",
+    basePath: "docs/src/lib/registry/ui"
+  };
+  
+  // Registry URL for shadcn-svelte.com
   private readonly registryBaseUrl = process.env.SHADCN_SVELTE_REGISTRY_URL || 
     "https://shadcn-svelte.com/registry";
   
@@ -133,8 +145,80 @@ export class ShadcnSvelteRegistry {
         }
       }],
     });
+    
+    // GitHub API client
+    this.githubClient = new Axios({
+      baseURL: "https://api.github.com",
+      headers: {
+        "Accept": "application/vnd.github.v3+json",
+        "User-Agent": "ShadcnSvelteMcpServer/1.0.0",
+        ...(process.env.GITHUB_API_KEY && {
+          "Authorization": `token ${process.env.GITHUB_API_KEY}`
+        })
+      },
+      timeout: 30000,
+      transformResponse: [(data) => {
+        try {
+          return JSON.parse(data);
+        } catch {
+          return data;
+        }
+      }],
+    });
   }
 
+  /**
+   * Fetch and parse the registry.json file from GitHub
+   */
+  private async fetchRegistryIndex(): Promise<RegistryIndex> {
+    if (this.registryIndex) return this.registryIndex;
+    
+    const cached = this.cache.get('registry-index');
+    if (cached) {
+      this.registryIndex = cached;
+      return cached;
+    }
+    
+    try {
+      const response = await this.fetchWithRetry(async () => {
+        return await this.githubClient.get(
+          `/repos/${this.githubRepo.owner}/${this.githubRepo.repo}/contents/docs/registry.json?ref=${this.githubRepo.branch}`
+        );
+      });
+      
+      if (response && response.data && response.data.content) {
+        const content = Buffer.from(response.data.content, 'base64').toString('utf-8');
+        const registry = JSON.parse(content);
+        
+        // Transform registry items into an index
+        const index: RegistryIndex = {};
+        if (registry.items && Array.isArray(registry.items)) {
+          registry.items.forEach((item: any) => {
+            if (item.type === 'registry:ui' && item.name) {
+              index[item.name] = {
+                name: item.name,
+                type: item.type,
+                files: item.files || [],
+                dependencies: item.dependencies || [],
+                registryDependencies: item.registryDependencies || [],
+                description: `${item.name} component from shadcn-svelte`
+              };
+            }
+          });
+        }
+        
+        this.registryIndex = index;
+        this.cache.set('registry-index', index);
+        return index;
+      }
+    } catch (error) {
+      console.error('Failed to fetch registry index from GitHub:', error);
+    }
+    
+    // Fallback to empty index
+    return {};
+  }
+  
   /**
    * Get list of available components
    */
@@ -143,15 +227,15 @@ export class ShadcnSvelteRegistry {
     if (cached) return cached;
 
     try {
-      // Try to fetch from registry index
-      const response = await this.httpClient.get('/index.json');
-      if (response.data && typeof response.data === 'object') {
-        const components = Object.keys(response.data);
+      const index = await this.fetchRegistryIndex();
+      const components = Object.keys(index);
+      
+      if (components.length > 0) {
         this.cache.set('components-list', components);
         return components;
       }
     } catch (error) {
-      console.warn('Failed to fetch registry index, using fallback list', error);
+      console.warn('Failed to fetch component list, using fallback', error);
     }
 
     // Fallback to static list
@@ -160,7 +244,72 @@ export class ShadcnSvelteRegistry {
   }
 
   /**
-   * Get component metadata and files
+   * Fetch with retry logic
+   */
+  private async fetchWithRetry<T>(
+    fetcher: () => Promise<T>,
+    retries: number = 3,
+    delay: number = 1000
+  ): Promise<T | null> {
+    for (let i = 0; i < retries; i++) {
+      try {
+        return await fetcher();
+      } catch (error: any) {
+        const isLastAttempt = i === retries - 1;
+        
+        // Check for rate limit
+        if (error.response?.status === 403 && error.response?.data?.message?.includes('rate limit')) {
+          const resetTime = error.response.headers?.['x-ratelimit-reset'];
+          if (resetTime) {
+            const resetDate = new Date(parseInt(resetTime) * 1000);
+            console.error(`GitHub API rate limit exceeded. Resets at: ${resetDate.toISOString()}`);
+          }
+          throw new Error('GitHub API rate limit exceeded. Please set GITHUB_API_KEY environment variable or wait.');
+        }
+        
+        // Don't retry on 404s
+        if (error.response?.status === 404) {
+          throw error;
+        }
+        
+        if (!isLastAttempt) {
+          console.warn(`Attempt ${i + 1} failed, retrying in ${delay}ms...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          delay *= 2; // Exponential backoff
+        } else {
+          throw error;
+        }
+      }
+    }
+    return null;
+  }
+  
+  /**
+   * Fetch component file content from GitHub
+   */
+  private async fetchFileContent(filePath: string): Promise<string> {
+    try {
+      // Convert registry path to GitHub path
+      const githubPath = filePath.replace('src/lib/registry/', 'docs/src/lib/registry/');
+      
+      const response = await this.fetchWithRetry(async () => {
+        return await this.githubClient.get(
+          `/repos/${this.githubRepo.owner}/${this.githubRepo.repo}/contents/${githubPath}?ref=${this.githubRepo.branch}`
+        );
+      });
+      
+      if (response && response.data && response.data.content) {
+        return Buffer.from(response.data.content, 'base64').toString('utf-8');
+      }
+    } catch (error: any) {
+      console.error(`Failed to fetch file ${filePath}:`, error.message || error);
+    }
+    
+    return '';
+  }
+  
+  /**
+   * Get component metadata and files with actual content
    */
   async getComponent(componentName: string): Promise<ComponentMetadata | null> {
     const cacheKey = `component-${componentName}`;
@@ -168,15 +317,31 @@ export class ShadcnSvelteRegistry {
     if (cached) return cached;
 
     try {
-      // Try to fetch component data from registry
-      const response = await this.httpClient.get(`/${componentName}.json`);
-      if (response.data) {
-        const componentData = response.data as ComponentMetadata;
-        this.cache.set(cacheKey, componentData);
-        return componentData;
+      const index = await this.fetchRegistryIndex();
+      const componentMeta = index[componentName];
+      
+      if (componentMeta) {
+        // Fetch actual file contents
+        const filesWithContent = await Promise.all(
+          componentMeta.files.map(async (file) => {
+            const content = await this.fetchFileContent(file.path);
+            return {
+              ...file,
+              content
+            };
+          })
+        );
+        
+        const completeComponent: ComponentMetadata = {
+          ...componentMeta,
+          files: filesWithContent
+        };
+        
+        this.cache.set(cacheKey, completeComponent);
+        return completeComponent;
       }
     } catch (error) {
-      console.warn(`Failed to fetch component ${componentName} from registry`, error);
+      console.warn(`Failed to fetch component ${componentName}`, error);
     }
 
     // Fallback: construct basic metadata
@@ -223,11 +388,12 @@ export class ShadcnSvelteRegistry {
 
     // Add file contents if available
     for (const file of component.files) {
-      combinedSource += `// File: ${file.path}\n`;
+      const fileName = path.basename(file.path);
+      combinedSource += `// File: ${fileName}\n`;
       if (file.content) {
         combinedSource += file.content;
       } else {
-        combinedSource += `// Content not available in registry metadata\n`;
+        combinedSource += `// Content not available\n`;
       }
       combinedSource += '\n\n';
     }

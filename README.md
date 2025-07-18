@@ -7,12 +7,14 @@ A Model Context Protocol (MCP) server that provides AI assistants with comprehen
 
 ## 🚀 Key Features
 
-- **Component Source Code**: Get shadcn-svelte component source for Svelte 5
-- **Component Documentation**: Access usage information and examples
+- **Real-Time Component Fetching**: Fetches actual component source code directly from the shadcn-svelte GitHub repository
+- **UI Pattern Composition**: Generate complete UI patterns using multiple shadcn components (login forms, dashboards, etc.)
+- **Component Scaffolding**: Create custom components following shadcn patterns and conventions
+- **Smart Caching**: Efficient caching with TTL to reduce API calls
+- **Retry Logic**: Automatic retry with exponential backoff for better reliability
 - **Registry Integration**: Work with the shadcn-svelte registry system
-- **Metadata Access**: Get component dependencies, descriptions, and configuration details
-- **SvelteKit Support**: Full support for SvelteKit projects and conventions
-- **Svelte 5 Runes**: Components use modern Svelte 5 syntax with runes
+- **Svelte 5 Runes**: Full support for modern Svelte 5 syntax with runes
+- **TypeScript Support**: Fully typed components with proper TypeScript definitions
 
 ## 📦 Quick Start
 
@@ -137,10 +139,20 @@ The MCP server provides these tools for AI assistants:
 
 ### Component Tools
 
-- **`get_component`** - Get component source code from the registry
+- **`get_component`** - Get actual component source code from GitHub
 - **`get_component_demo`** - Get component usage information and documentation
 - **`list_components`** - List all available shadcn-svelte components
 - **`get_component_metadata`** - Get component dependencies and metadata
+
+### UI Pattern Tools (New!)
+
+- **`compose_ui_pattern`** - Generate complete UI patterns using multiple components
+  - Available patterns: login-form, signup-form, profile-card, dashboard-header, data-table-page, settings-page, card-grid, sidebar-layout, navbar-with-menu, footer, hero-section, pricing-cards, contact-form, search-bar, notification-center
+  - Options: includeState, includeValidation, responsive, darkMode
+
+- **`scaffold_component`** - Create custom components following shadcn patterns
+  - Component types: primitive, composite, layout
+  - Support for variants, props, and base component extension
 
 ### Repository Tools
 
@@ -157,6 +169,34 @@ The MCP server provides these tools for AI assistants:
 {
   "tool": "get_component",
   "arguments": { "componentName": "button" }
+}
+
+// Generate a login form pattern
+{
+  "tool": "compose_ui_pattern",
+  "arguments": { 
+    "pattern": "login-form",
+    "options": {
+      "includeState": true,
+      "responsive": true
+    }
+  }
+}
+
+// Create a custom profile card component
+{
+  "tool": "scaffold_component",
+  "arguments": {
+    "name": "user-profile-card",
+    "type": "composite",
+    "baseComponent": "card",
+    "variants": ["default", "compact", "detailed"],
+    "props": [
+      { "name": "userName", "type": "string", "required": true },
+      { "name": "avatarUrl", "type": "string" },
+      { "name": "bio", "type": "string" }
+    ]
+  }
 }
 
 // List all components
@@ -253,6 +293,26 @@ DEBUG=* node build/index.js --github-api-key ghp_your_token
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
+## 🎯 Recent Improvements
+
+### Enhanced Component Fetching
+- **Real-time GitHub Integration**: Components are now fetched directly from the shadcn-svelte GitHub repository
+- **Complete Source Code**: All component files including .svelte files and TypeScript definitions
+- **Smart Caching**: 1-hour TTL cache to balance freshness with API rate limits
+- **Retry Logic**: Automatic retry with exponential backoff for network reliability
+
+### New UI Pattern Generation
+- **Pre-built Patterns**: Generate complete UI patterns like login forms, dashboards, and data tables
+- **Customizable Options**: Control state management, validation, responsiveness, and dark mode
+- **Svelte 5 Syntax**: All patterns use modern Svelte 5 runes and conventions
+- **Intelligent Imports**: Automatically generates correct import statements
+
+### Component Scaffolding
+- **Custom Components**: Create new components following shadcn design patterns
+- **Type Safety**: Full TypeScript support with proper prop types
+- **Variant Support**: Define multiple visual variants for your components
+- **Base Extension**: Extend existing shadcn components with additional functionality
+
 ## 🤝 Contributing
 
 1. Fork the repository
@@ -263,25 +323,27 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-- 🐛 [Report Issues](https://github.com/Jpisnice/shadcn-ui-mcp-server/issues)
-- 💬 [Discussions](https://github.com/Jpisnice/shadcn-ui-mcp-server/discussions)
-- 📖 [Documentation](https://github.com/Jpisnice/shadcn-ui-mcp-server#readme)
-- 📦 [npm Package](https://www.npmjs.com/package/@jpisnice/shadcn-ui-mcp-server)
+- 🐛 [Report Issues](https://github.com/benjaminmodayil/shadcn-ui-mcp-server-svelte/issues)
+- 💬 [Discussions](https://github.com/benjaminmodayil/shadcn-ui-mcp-server-svelte/discussions)
+- 📖 [Documentation](https://github.com/benjaminmodayil/shadcn-ui-mcp-server-svelte#readme)
 
 ## 🔗 Related Projects
 
-- [shadcn/ui](https://ui.shadcn.com/) - The component library this server provides access to
+- [shadcn-svelte](https://shadcn-svelte.com/) - The Svelte component library this server provides access to
+- [shadcn/ui](https://ui.shadcn.com/) - The original React component library
 - [Model Context Protocol](https://modelcontextprotocol.io/) - The protocol specification
 - [MCP TypeScript SDK](https://github.com/modelcontextprotocol/typescript-sdk) - Official MCP SDK
 
 ## ⭐ Acknowledgments
 
-- [shadcn](https://github.com/shadcn) for the amazing UI component library
+- [huntabyte](https://github.com/huntabyte) for creating and maintaining shadcn-svelte
+- [shadcn](https://github.com/shadcn) for the original UI component library design
 - [Anthropic](https://anthropic.com) for the Model Context Protocol specification
-- The open source community for inspiration and contributions
+- The Svelte community for their amazing framework and ecosystem
 
 ---
 
-**Made with ❤️ by [Janardhan Polle](https://github.com/Jpisnice)**
+**Adapted for Svelte by [Benjamin Modayil](https://github.com/benjaminmodayil)**
+**Originally created by [Janardhan Polle](https://github.com/Jpisnice)**
 
 **Star ⭐ this repo if you find it helpful!**
