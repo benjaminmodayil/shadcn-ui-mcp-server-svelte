@@ -1,18 +1,18 @@
-# Shadcn UI v4 MCP Server
+# Shadcn-Svelte MCP Server
 
-[![npm version](https://badge.fury.io/js/@jpisnice%2Fshadcn-ui-mcp-server.svg)](https://badge.fury.io/js/@jpisnice%2Fshadcn-ui-mcp-server)
+<!-- [![npm version](https://badge.fury.io/js/shadcn-svelte-mcp-server.svg)](https://badge.fury.io/js/shadcn-svelte-mcp-server) -->
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A Model Context Protocol (MCP) server that provides AI assistants with comprehensive access to [shadcn/ui v4](https://ui.shadcn.com/) components, blocks, demos, and metadata. This server enables AI tools like Claude Desktop, Continue.dev, and other MCP-compatible clients to retrieve and work with shadcn/ui components seamlessly.
+A Model Context Protocol (MCP) server that provides AI assistants with comprehensive access to [shadcn-svelte](https://shadcn-svelte.com/) components, documentation, and metadata. This server enables AI tools like Claude Desktop, Continue.dev, and other MCP-compatible clients to retrieve and work with shadcn-svelte components for Svelte 5 and SvelteKit projects seamlessly.
 
 ## 🚀 Key Features
 
-- **Component Source Code**: Get the latest shadcn/ui v4 component TypeScript source
-- **Component Demos**: Access example implementations and usage patterns  
-- **Blocks Support**: Retrieve complete block implementations (dashboards, calendars, login forms, etc.)
+- **Component Source Code**: Get shadcn-svelte component source for Svelte 5
+- **Component Documentation**: Access usage information and examples
+- **Registry Integration**: Work with the shadcn-svelte registry system
 - **Metadata Access**: Get component dependencies, descriptions, and configuration details
-- **Directory Browsing**: Explore the shadcn/ui repository structure
-- **GitHub API Integration**: Efficient caching and intelligent rate limit handling
+- **SvelteKit Support**: Full support for SvelteKit projects and conventions
+- **Svelte 5 Runes**: Components use modern Svelte 5 syntax with runes
 
 ## 📦 Quick Start
 
@@ -21,26 +21,30 @@ A Model Context Protocol (MCP) server that provides AI assistants with comprehen
 The fastest way to get started - no installation required!
 
 ```bash
-# Basic usage (rate limited to 60 requests/hour)
-npx @jpisnice/shadcn-ui-mcp-server
+# Build the project first
+npm install
+npm run build
+
+# Basic usage
+node build/index.js
 
 # With GitHub token for better rate limits (5000 requests/hour)
-npx @jpisnice/shadcn-ui-mcp-server --github-api-key ghp_your_token_here
+node build/index.js --github-api-key ghp_your_token_here
 
 # Short form
-npx @jpisnice/shadcn-ui-mcp-server -g ghp_your_token_here
+node build/index.js -g ghp_your_token_here
 
 # Using environment variable
 export GITHUB_PERSONAL_ACCESS_TOKEN=ghp_your_token_here
-npx @jpisnice/shadcn-ui-mcp-server
+node build/index.js
 ```
 
-**🎯 Try it now**: Run `npx @jpisnice/shadcn-ui-mcp-server --help` to see all options!
+**🎯 Try it now**: Run `node build/index.js --help` to see all options!
 
 ### 🔧 Command Line Options
 
 ```bash
-shadcn-ui-mcp-server [options]
+shadcn-svelte-mcp-server [options]
 
 Options:
   --github-api-key, -g <token>    GitHub Personal Access Token
@@ -51,10 +55,10 @@ Environment Variables:
   GITHUB_PERSONAL_ACCESS_TOKEN    Alternative way to provide GitHub token
 
 Examples:
-  npx @jpisnice/shadcn-ui-mcp-server --help
-  npx @jpisnice/shadcn-ui-mcp-server --version
-  npx @jpisnice/shadcn-ui-mcp-server -g ghp_1234567890abcdef
-  GITHUB_PERSONAL_ACCESS_TOKEN=ghp_token npx @jpisnice/shadcn-ui-mcp-server
+  node build/index.js --help
+  node build/index.js --version
+  node build/index.js -g ghp_1234567890abcdef
+  GITHUB_PERSONAL_ACCESS_TOKEN=ghp_token node build/index.js
 ```
 
 ## 🔑 GitHub API Token Setup
@@ -84,7 +88,8 @@ Examples:
 
 **Method 1: Command Line (Quick testing)**
 ```bash
-npx @jpisnice/shadcn-ui-mcp-server --github-api-key ghp_your_token_here
+# npx @jpisnice/shadcn-ui-mcp-server --github-api-key ghp_your_token_here
+node build/index.js --github-api-key ghp_your_token_here
 ```
 
 **Method 2: Environment Variable (Recommended)**
@@ -93,7 +98,7 @@ npx @jpisnice/shadcn-ui-mcp-server --github-api-key ghp_your_token_here
 export GITHUB_PERSONAL_ACCESS_TOKEN=ghp_your_token_here
 
 # Then simply run:
-npx @jpisnice/shadcn-ui-mcp-server
+node build/index.js
 ```
 
 **Method 3: Claude Desktop Configuration**
@@ -101,8 +106,8 @@ npx @jpisnice/shadcn-ui-mcp-server
 {
   "mcpServers": {
     "shadcn-ui": {
-      "command": "npx",
-      "args": ["@jpisnice/shadcn-ui-mcp-server"],
+      "command": "node",
+      "args": ["[LOCAL_PATH]/build/index.js"],
       "env": {
         "GITHUB_PERSONAL_ACCESS_TOKEN": "ghp_your_token_here"
       }
@@ -115,10 +120,12 @@ npx @jpisnice/shadcn-ui-mcp-server
 
 ```bash
 # Test without token (should show rate limit warning)
-npx @jpisnice/shadcn-ui-mcp-server --help
+# npx @jpisnice/shadcn-ui-mcp-server --help
+node build/index.js --help
 
 # Test with token (should show success message)
-npx @jpisnice/shadcn-ui-mcp-server --github-api-key ghp_your_token --help
+# npx @jpisnice/shadcn-ui-mcp-server --github-api-key ghp_your_token --help
+node build/index.js --github-api-key ghp_your_token --help
 
 # Check your current rate limit
 curl -H "Authorization: token ghp_your_token" https://api.github.com/rate_limit
@@ -130,19 +137,16 @@ The MCP server provides these tools for AI assistants:
 
 ### Component Tools
 
-- **`get_component`** - Get component source code
-- **`get_component_demo`** - Get component usage examples
-- **`list_components`** - List all available components
-- **`get_component_metadata`** - Get component dependencies and info
-
-### Block Tools
-
-- **`get_block`** - Get complete block implementations (dashboard-01, calendar-01, etc.)
-- **`list_blocks`** - List all available blocks with categories
+- **`get_component`** - Get component source code from the registry
+- **`get_component_demo`** - Get component usage information and documentation
+- **`list_components`** - List all available shadcn-svelte components
+- **`get_component_metadata`** - Get component dependencies and metadata
 
 ### Repository Tools
 
-- **`get_directory_structure`** - Explore the shadcn/ui repository structure
+- **`get_directory_structure`** - Explore the shadcn-svelte repository structure
+
+**Note**: shadcn-svelte uses a registry-based system instead of blocks. Components are designed to be composed together to build complex UI patterns.
 
 ### Example Tool Usage
 
@@ -161,23 +165,25 @@ The MCP server provides these tools for AI assistants:
   "arguments": {}
 }
 
-// Get dashboard block
+// Get component metadata
 {
-  "tool": "get_block", 
-  "arguments": { "blockName": "dashboard-01" }
+  "tool": "get_component_metadata", 
+  "arguments": { "componentName": "button" }
 }
 ```
 
 ## 🔗 Claude Desktop Integration
+
+**Note**: Since this package is not published to npm, you need to use local paths. Replace `[LOCAL_PATH]` with the absolute path to your local installation.
 
 Add to your Claude Desktop configuration (`~/.config/Claude/claude_desktop_config.json`):
 
 ```json
 {
   "mcpServers": {
-    "shadcn-ui": {
-      "command": "npx",
-      "args": ["@jpisnice/shadcn-ui-mcp-server", "--github-api-key", "ghp_your_token_here"]
+    "shadcn-svelte": {
+      "command": "node",
+      "args": ["[LOCAL_PATH]/build/index.js", "--github-api-key", "ghp_your_token_here"]
     }
   }
 }
@@ -188,9 +194,9 @@ Or with environment variable:
 ```json
 {
   "mcpServers": {
-    "shadcn-ui": {
-      "command": "npx",
-      "args": ["@jpisnice/shadcn-ui-mcp-server"],
+    "shadcn-svelte": {
+      "command": "node",
+      "args": ["[LOCAL_PATH]/build/index.js"],
       "env": {
         "GITHUB_PERSONAL_ACCESS_TOKEN": "ghp_your_token_here"
       }
@@ -206,7 +212,7 @@ Or with environment variable:
 **"Rate limit exceeded" errors:**
 ```bash
 # Solution: Add GitHub API token
-npx @jpisnice/shadcn-ui-mcp-server --github-api-key ghp_your_token_here
+node build/index.js --github-api-key ghp_your_token_here
 ```
 
 **"Command not found" errors:**
@@ -219,7 +225,8 @@ npx --version   # Should work
 **Component not found:**
 ```bash
 # Check available components first
-npx @jpisnice/shadcn-ui-mcp-server
+# npx @benjaminmodayil/shadcn-svelte-mcp-server
+node build/index.js
 # Then call list_components tool via your MCP client
 ```
 
@@ -228,7 +235,8 @@ npx @jpisnice/shadcn-ui-mcp-server
 # Set proxy if needed
 export HTTP_PROXY=http://your-proxy:8080
 export HTTPS_PROXY=http://your-proxy:8080
-npx @jpisnice/shadcn-ui-mcp-server
+# npx @benjaminmodayil/shadcn-svelte-mcp-server
+node build/index.js
 ```
 
 ### Debug Mode
@@ -237,7 +245,8 @@ Enable verbose logging:
 
 ```bash
 # Set debug environment variable
-DEBUG=* npx @jpisnice/shadcn-ui-mcp-server --github-api-key ghp_your_token
+# DEBUG=* npx @benjaminmodayil/shadcn-svelte-mcp-server --github-api-key ghp_your_token
+DEBUG=* node build/index.js --github-api-key ghp_your_token
 ```
 
 ## 📄 License

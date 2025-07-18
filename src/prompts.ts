@@ -12,11 +12,11 @@
 export const prompts = {
     "build-shadcn-page": {
       name: "build-shadcn-page",
-      description: "Generate a complete shadcn/ui page using v4 components and blocks",
+      description: "Generate a complete shadcn-svelte page using components",
       arguments: [
           { 
               name: "pageType",
-              description: "Type of page to build (dashboard, login, calendar, sidebar, products, custom)",
+              description: "Type of page to build (dashboard, login, settings, profile, custom)",
               required: true,
           },
           {
@@ -35,7 +35,7 @@ export const prompts = {
     },
     "create-dashboard": {
       name: "create-dashboard",
-      description: "Create a comprehensive dashboard using shadcn/ui v4 blocks and components",
+      description: "Create a comprehensive dashboard using shadcn-svelte components",
       arguments: [
           {
               name: "dashboardType",
@@ -54,7 +54,7 @@ export const prompts = {
     },
     "create-auth-flow": {
       name: "create-auth-flow",
-      description: "Generate authentication pages using shadcn/ui v4 login blocks",
+      description: "Generate authentication pages using shadcn-svelte components",
       arguments: [
           {
               name: "authType",
@@ -73,7 +73,7 @@ export const prompts = {
     },
     "optimize-shadcn-component": {
       name: "optimize-shadcn-component",
-      description: "Optimize or enhance existing shadcn/ui components with best practices",
+      description: "Optimize or enhance existing shadcn-svelte components with best practices",
       arguments: [
           {
               name: "component",
@@ -92,7 +92,7 @@ export const prompts = {
     },
     "create-data-table": {
       name: "create-data-table",
-      description: "Create advanced data tables with shadcn/ui components",
+      description: "Create advanced data tables with shadcn-svelte components",
       arguments: [
           {
               name: "dataType",
@@ -125,7 +125,7 @@ export const promptHandlers = {
             role: "user",
             content: {
               type: "text",
-              text: `Create a complete ${pageType} page using shadcn/ui v4 components and blocks. 
+              text: `Create a complete ${pageType} page using shadcn-svelte components. 
 
 REQUIREMENTS:
 - Page Type: ${pageType}
@@ -134,15 +134,15 @@ REQUIREMENTS:
 - Design Style: ${style}
 
 INSTRUCTIONS:
-1. Use the MCP tools to explore available v4 blocks for this page type:
-   - Use 'list_blocks' to see available categories
-   - Use 'get_block' to fetch specific block implementations
+1. Use the MCP tools to explore available components:
+   - Use 'list_components' to see all available components
+   - Use 'get_component' to fetch specific component implementations
 
 2. Build the page following these principles:
-   - Use shadcn/ui v4 components and blocks as building blocks
+   - Use shadcn-svelte components from $lib/components/ui/
    - Ensure responsive design with Tailwind CSS classes
    - Implement proper TypeScript types
-   - Follow React best practices and hooks patterns
+   - Follow Svelte 5 best practices with runes ($state, $derived, $effect)
    - Include proper accessibility attributes
 
 3. For ${pageType} pages specifically:
@@ -151,15 +151,15 @@ INSTRUCTIONS:
 4. Code Structure:
    - Create a main page component
    - Use sub-components for complex sections
-   - Include proper imports from shadcn/ui registry
-   - Add necessary state management with React hooks
+   - Include proper imports from $lib/components/ui/
+   - Add necessary state management with Svelte 5 runes
    - Include proper error handling
 
 5. Styling Guidelines:
    - Use consistent spacing and typography
    - Implement ${style} design principles
    - Ensure dark/light mode compatibility
-   - Use shadcn/ui design tokens
+   - Use shadcn-svelte design tokens
 
 Please provide complete, production-ready code with proper imports and TypeScript types.`,
             },
@@ -177,7 +177,7 @@ Please provide complete, production-ready code with proper imports and TypeScrip
             role: "user",
             content: {
               type: "text",
-              text: `Create a comprehensive ${dashboardType} dashboard using shadcn/ui v4 blocks and components.
+              text: `Create a comprehensive ${dashboardType} dashboard using shadcn-svelte components.
 
 REQUIREMENTS:
 - Dashboard Type: ${dashboardType}
@@ -185,13 +185,13 @@ REQUIREMENTS:
 - Navigation: ${navigation}
 
 INSTRUCTIONS:
-1. First, explore available dashboard blocks:
-   - Use 'list_blocks' with category="dashboard" to see available dashboard blocks
-   - Use 'get_block' to examine dashboard-01 and other dashboard implementations
-   - Study the structure and component usage
+1. First, explore available components:
+   - Use 'list_components' to see all available components
+   - Use 'get_component' to examine card, chart, table components
+   - Study the component documentation and usage patterns
 
 2. Dashboard Structure:
-   - Implement ${navigation} navigation using appropriate shadcn/ui components
+   - Implement ${navigation} navigation using appropriate shadcn-svelte components
    - Create a responsive grid layout for widgets
    - Include proper header with user menu and notifications
    - Add breadcrumb navigation
@@ -201,14 +201,14 @@ INSTRUCTIONS:
 
 4. Key Features:
    - Responsive design that works on mobile, tablet, and desktop
-   - Interactive charts using a charting library compatible with shadcn/ui
+   - Interactive charts using a charting library compatible with shadcn-svelte (e.g., chart component)
    - Data tables with sorting, filtering, and pagination
    - Modal dialogs for detailed views
    - Toast notifications for user feedback
 
 5. Data Management:
    - Create mock data structures for ${dashboardType}
-   - Implement state management with React hooks
+   - Implement state management with Svelte 5 runes ($state, $derived)
    - Add loading states and error handling
    - Include data refresh functionality
 
@@ -234,7 +234,7 @@ Provide complete code with all necessary imports, types, and implementations.`,
             role: "user",
             content: {
               type: "text",
-              text: `Create a complete ${authType} authentication flow using shadcn/ui v4 login blocks and components.
+              text: `Create a complete ${authType} authentication flow using shadcn-svelte components.
 
 REQUIREMENTS:
 - Auth Type: ${authType}
@@ -242,13 +242,13 @@ REQUIREMENTS:
 - Features: ${features}
 
 INSTRUCTIONS:
-1. Explore login blocks first:
-   - Use 'list_blocks' with category="login" to see available login blocks
-   - Use 'get_block' to examine login-01, login-02, etc. implementations
-   - Study different authentication patterns and layouts
+1. Explore authentication components:
+   - Use 'list_components' to see components like form, input, button
+   - Use 'get_component' to examine form-related components
+   - Study component composition patterns
 
 2. Authentication Components:
-   - Form validation using react-hook-form or similar
+   - Form validation using sveltekit-superforms, formsnap, or felte
    - Input components with proper error states
    - Loading states during authentication
    - Success/error feedback with toast notifications
@@ -277,7 +277,7 @@ INSTRUCTIONS:
    ).join('\n   ')}
 
 7. Layout Options:
-   - Choose appropriate layout from available login blocks
+   - Create appropriate layout using shadcn-svelte components
    - Center-aligned forms with proper spacing
    - Background images or gradients (optional)
    - Responsive design for all screen sizes
@@ -298,7 +298,7 @@ Provide complete authentication flow code with proper TypeScript types, validati
             role: "user",
             content: {
               type: "text",
-              text: `Optimize the ${component} shadcn/ui component for ${optimization} and ${useCase} use case.
+              text: `Optimize the ${component} shadcn-svelte component for ${optimization} and ${useCase} use case.
 
 REQUIREMENTS:
 - Component: ${component}
@@ -326,8 +326,8 @@ INSTRUCTIONS:
    - Include usage examples demonstrating improvements
 
 5. Best Practices:
-   - Follow React performance best practices
-   - Implement proper memoization where needed
+   - Follow Svelte 5 performance best practices
+   - Use $derived for computed values instead of recalculating
    - Ensure backward compatibility
    - Add comprehensive prop validation
 
@@ -352,7 +352,7 @@ Provide the optimized component code with detailed explanations of improvements 
             role: "user",
             content: {
               type: "text",
-              text: `Create an advanced data table for ${dataType} using shadcn/ui v4 components.
+              text: `Create an advanced data table for ${dataType} using shadcn-svelte components.
 
 REQUIREMENTS:
 - Data Type: ${dataType}
@@ -363,7 +363,7 @@ INSTRUCTIONS:
 1. Explore table components:
    - Use 'get_component' for 'table' to see the base table implementation
    - Use 'get_component_demo' for 'table' to see usage examples
-   - Look for any existing table blocks in the blocks directory
+   - Check data-table component for advanced features
 
 2. Table Structure:
    - Create a reusable DataTable component
@@ -421,45 +421,45 @@ Provide complete data table implementation with proper TypeScript types, mock da
 function getPageTypeSpecificInstructions(pageType: string): string {
   const instructions = {
     dashboard: `
-   - Use dashboard blocks as foundation (dashboard-01)
-   - Include metrics cards, charts, and data tables
-   - Implement sidebar navigation with proper menu structure
-   - Add header with user profile and notifications
-   - Create responsive grid layout for widgets`,
+   - Use card, chart, and table components as foundation
+   - Include metrics cards with shadcn-svelte card component
+   - Implement sidebar navigation with sidebar component
+   - Add header with dropdown-menu for user profile
+   - Create responsive grid layout using Tailwind CSS`,
     
     login: `
-   - Use login blocks as reference (login-01 through login-05)
-   - Implement form validation with clear error messages
-   - Add social authentication options if specified
+   - Use form, input, and button components
+   - Implement form validation with formsnap or sveltekit-superforms
+   - Add social authentication buttons if specified
    - Include forgot password and sign-up links
    - Ensure mobile-responsive design`,
     
     calendar: `
-   - Use calendar blocks (calendar-01 through calendar-32)
-   - Implement different calendar views (month, week, day)
-   - Add event creation and management
-   - Include date navigation and filtering
-   - Support event categories and colors`,
+   - Use calendar and date-picker components
+   - Implement different calendar views if needed
+   - Add event creation with dialog component
+   - Include date navigation with button components
+   - Support event categories with badge component`,
     
     sidebar: `
-   - Use sidebar blocks as foundation (sidebar-01 through sidebar-16)
-   - Implement collapsible navigation
-   - Add proper menu hierarchy
-   - Include search functionality
+   - Use sidebar component as foundation
+   - Implement collapsible navigation with collapsible component
+   - Add proper menu hierarchy with navigation-menu
+   - Include search functionality with input component
    - Support both light and dark themes`,
     
     products: `
-   - Use products blocks as reference (products-01)
-   - Create product grid/list views
-   - Implement filtering and sorting
-   - Add product details modal or page
-   - Include shopping cart functionality if needed`,
+   - Use card component for product displays
+   - Create product grid/list views with CSS Grid
+   - Implement filtering with select and checkbox components
+   - Add product details with dialog or sheet component
+   - Include shopping cart with dropdown-menu if needed`,
     
     custom: `
-   - Analyze requirements and choose appropriate blocks
-   - Combine multiple block patterns as needed
-   - Focus on component reusability
-   - Ensure consistent design patterns`
+   - Analyze requirements and choose appropriate components
+   - Combine multiple shadcn-svelte components as needed
+   - Focus on component composition and reusability
+   - Ensure consistent design patterns with shadcn-svelte`
   };
   
   return instructions[pageType as keyof typeof instructions] || instructions.custom;
@@ -471,12 +471,12 @@ function getPageTypeSpecificInstructions(pageType: string): string {
 function getOptimizationInstructions(optimization: string): string {
   const instructions = {
     performance: `
-   - Implement React.memo for preventing unnecessary re-renders
-   - Use useMemo and useCallback hooks appropriately
-   - Optimize bundle size by code splitting
+   - Use Svelte's built-in reactivity efficiently
+   - Leverage $derived for computed values
+   - Optimize bundle size with SvelteKit's code splitting
    - Implement virtual scrolling for large lists
-   - Minimize DOM manipulations
-   - Use lazy loading for heavy components`,
+   - Minimize reactive statements in loops
+   - Use {#key} blocks judiciously for list updates`,
    
     accessibility: `
    - Add proper ARIA labels and roles

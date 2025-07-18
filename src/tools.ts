@@ -48,7 +48,7 @@ export const server = new McpServer({
 
 // Tool: get_component - Fetch component source code
 server.tool("get_component",
-  'Get the source code for a specific shadcn/ui v4 component',
+  'Get the source code for a specific shadcn-svelte component',
   { 
     componentName: z.string().describe('Name of the shadcn/ui component (e.g., "accordion", "button")') 
   },
@@ -73,7 +73,7 @@ server.tool("get_component",
 
 // Tool: get_component_demo - Fetch component demo/example
 server.tool("get_component_demo",
-  'Get demo code illustrating how a shadcn/ui v4 component should be used',
+  'Get documentation and usage information for a shadcn-svelte component',
   { 
     componentName: z.string().describe('Name of the shadcn/ui component (e.g., "accordion", "button")') 
   },
@@ -98,7 +98,7 @@ server.tool("get_component_demo",
 
 // Tool: list_components - Get all available components
 server.tool("list_components",
-  'Get all available shadcn/ui v4 components',
+  'Get all available shadcn-svelte components',
   {},
   async () => {
     try {
@@ -127,7 +127,7 @@ server.tool("list_components",
 
 // Tool: get_component_metadata - Get component metadata
 server.tool("get_component_metadata",
-  'Get metadata for a specific shadcn/ui v4 component',
+  'Get metadata for a specific shadcn-svelte component',
   { 
     componentName: z.string().describe('Name of the shadcn/ui component (e.g., "accordion", "button")') 
   },
@@ -168,7 +168,7 @@ server.tool("get_directory_structure",
       const directoryTree = await axios.buildDirectoryTree(
         owner || axios.paths.REPO_OWNER,
         repo || axios.paths.REPO_NAME,
-        path || axios.paths.NEW_YORK_V4_PATH,
+        path || 'packages',
         branch || axios.paths.REPO_BRANCH
       );
       
@@ -191,9 +191,9 @@ server.tool("get_directory_structure",
   }
 );
 
-// Tool: get_block - Get specific block code from v4 registry
+// Tool: get_block - Deprecated for shadcn-svelte
 server.tool("get_block",
-  'Get source code for a specific shadcn/ui v4 block (e.g., calendar-01, dashboard-01)',
+  '[DEPRECATED] shadcn-svelte uses individual components instead of blocks. Use get_component tool instead.',
   { 
     blockName: z.string().describe('Name of the block (e.g., "calendar-01", "dashboard-01", "login-02")'),
     includeComponents: z.boolean().optional().describe('Whether to include component files for complex blocks (default: true)')
@@ -220,9 +220,9 @@ server.tool("get_block",
   }
 );
 
-// Tool: list_blocks - Get all available blocks
+// Tool: list_blocks - Deprecated for shadcn-svelte
 server.tool("list_blocks",
-  'Get all available shadcn/ui v4 blocks with categorization',
+  '[DEPRECATED] shadcn-svelte uses individual components instead of blocks. Use list_components tool instead.',
   {
     category: z.string().optional().describe('Filter by category (calendar, dashboard, login, sidebar, products)')
   },
@@ -252,7 +252,7 @@ server.tool("list_blocks",
 export const tools = {
   'get_component': {
     name: 'get_component',
-    description: 'Get the source code for a specific shadcn/ui v4 component',
+    description: 'Get the source code for a specific shadcn-svelte component',
     inputSchema: {
       type: 'object',
       properties: {
@@ -266,7 +266,7 @@ export const tools = {
   },
   'get_component_demo': {
     name: 'get_component_demo',
-    description: 'Get demo code illustrating how a shadcn/ui v4 component should be used',
+    description: 'Get documentation and usage information for a shadcn-svelte component',
     inputSchema: {
       type: 'object',
       properties: {
@@ -280,7 +280,7 @@ export const tools = {
   },
   'list_components': {
     name: 'list_components',
-    description: 'Get all available shadcn/ui v4 components',
+    description: 'Get all available shadcn-svelte components',
     inputSchema: {
       type: 'object',
       properties: {},
@@ -288,7 +288,7 @@ export const tools = {
   },
   'get_component_metadata': {
     name: 'get_component_metadata',
-    description: 'Get metadata for a specific shadcn/ui v4 component',
+    description: 'Get metadata for a specific shadcn-svelte component',
     inputSchema: {
       type: 'object',
       properties: {
@@ -327,7 +327,7 @@ export const tools = {
   },
   'get_block': {
     name: 'get_block',
-    description: 'Get source code for a specific shadcn/ui v4 block (e.g., calendar-01, dashboard-01)',
+    description: '[DEPRECATED] shadcn-svelte uses individual components instead of blocks',
     inputSchema: {
       type: 'object',
       properties: {
@@ -345,7 +345,7 @@ export const tools = {
   },
   'list_blocks': {
     name: 'list_blocks',
-    description: 'Get all available shadcn/ui v4 blocks with categorization',
+    description: '[DEPRECATED] shadcn-svelte uses individual components instead of blocks',
     inputSchema: {
       type: 'object',
       properties: {
@@ -393,7 +393,7 @@ export const toolHandlers = {
     const directoryTree = await axios.buildDirectoryTree(
       owner,
       repo,
-      path || axios.paths.NEW_YORK_V4_PATH,
+      path || 'packages',
       branch
     );
     return createSuccessResponse(directoryTree);
