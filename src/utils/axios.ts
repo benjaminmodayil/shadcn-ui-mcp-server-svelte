@@ -710,6 +710,397 @@ async function getGitHubRateLimit(): Promise<any> {
     }
 }
 
+/**
+ * Generate UI pattern using multiple shadcn components
+ * @param pattern Pattern name to generate
+ * @param options Additional generation options
+ * @returns Generated pattern code
+ */
+async function generateUIPattern(pattern: string, options: any = {}): Promise<string> {
+    const { includeState = true, includeValidation = true, responsive = true, darkMode = false } = options;
+    
+    // Pattern templates for common UI patterns
+    const patterns: Record<string, () => Promise<string>> = {
+        'login-form': async () => {
+            const components = ['card', 'button', 'input', 'label', 'alert'];
+            const imports = await generateImports(components);
+            
+            return `<script lang="ts">
+${imports}
+${includeState ? `
+  let email = $state('');
+  let password = $state('');
+  let error = $state('');
+  let loading = $state(false);
+  
+  async function handleSubmit(e: Event) {
+    e.preventDefault();
+    loading = true;
+    error = '';
+    
+    try {
+      // Your login logic here
+      await login(email, password);
+    } catch (err: any) {
+      error = err.message;
+    } finally {
+      loading = false;
+    }
+  }` : ''}
+</script>
+
+<Card class="${responsive ? 'w-full max-w-md mx-auto' : 'w-96'}">
+  <CardHeader>
+    <CardTitle>Login</CardTitle>
+    <CardDescription>Enter your credentials to access your account</CardDescription>
+  </CardHeader>
+  <form onsubmit={handleSubmit}>
+    <CardContent class="space-y-4">
+      {#if error}
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      {/if}
+      
+      <div class="space-y-2">
+        <Label for="email">Email</Label>
+        <Input 
+          id="email" 
+          type="email" 
+          bind:value={email}
+          required
+          placeholder="you@example.com"
+        />
+      </div>
+      
+      <div class="space-y-2">
+        <Label for="password">Password</Label>
+        <Input 
+          id="password" 
+          type="password" 
+          bind:value={password}
+          required
+        />
+      </div>
+    </CardContent>
+    <CardFooter>
+      <Button type="submit" class="w-full" disabled={loading}>
+        {loading ? 'Logging in...' : 'Login'}
+      </Button>
+    </CardFooter>
+  </form>
+</Card>`;
+        },
+        
+        'profile-card': async () => {
+            const components = ['card', 'avatar', 'button', 'badge'];
+            const imports = await generateImports(components);
+            
+            return `<script lang="ts">
+${imports}
+  
+  export let name: string;
+  export let role: string = '';
+  export let avatarUrl: string = '';
+  export let bio: string = '';
+  export let tags: string[] = [];
+</script>
+
+<Card class="${responsive ? 'w-full max-w-sm' : 'w-80'}">
+  <CardHeader class="text-center">
+    <Avatar class="w-24 h-24 mx-auto mb-4">
+      <AvatarImage src={avatarUrl} alt={name} />
+      <AvatarFallback>{name.slice(0, 2).toUpperCase()}</AvatarFallback>
+    </Avatar>
+    <CardTitle>{name}</CardTitle>
+    {#if role}
+      <CardDescription>{role}</CardDescription>
+    {/if}
+  </CardHeader>
+  {#if bio || tags.length > 0}
+    <CardContent>
+      {#if bio}
+        <p class="text-sm text-muted-foreground mb-4">{bio}</p>
+      {/if}
+      {#if tags.length > 0}
+        <div class="flex flex-wrap gap-2">
+          {#each tags as tag}
+            <Badge variant="secondary">{tag}</Badge>
+          {/each}
+        </div>
+      {/if}
+    </CardContent>
+  {/if}
+  <CardFooter class="flex gap-2">
+    <Button class="flex-1">Follow</Button>
+    <Button variant="outline" class="flex-1">Message</Button>
+  </CardFooter>
+</Card>`;
+        },
+        
+        'data-table-page': async () => {
+            const components = ['table', 'button', 'input', 'select', 'badge'];
+            const imports = await generateImports(components);
+            
+            return `<script lang="ts">
+${imports}
+${includeState ? `
+  type DataItem = {
+    id: string;
+    name: string;
+    status: 'active' | 'inactive' | 'pending';
+    date: string;
+  };
+  
+  let data = $state<DataItem[]>([
+    { id: '1', name: 'Item 1', status: 'active', date: '2024-01-01' },
+    { id: '2', name: 'Item 2', status: 'pending', date: '2024-01-02' },
+    { id: '3', name: 'Item 3', status: 'inactive', date: '2024-01-03' },
+  ]);
+  
+  let searchQuery = $state('');
+  let statusFilter = $state<string>('all');
+  
+  const filteredData = $derived(() => {
+    return data.filter(item => {
+      const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesStatus = statusFilter === 'all' || item.status === statusFilter;
+      return matchesSearch && matchesStatus;
+    });
+  });` : ''}
+</script>
+
+<div class="space-y-4">
+  <div class="flex ${responsive ? 'flex-col sm:flex-row' : 'flex-row'} gap-4">
+    <Input 
+      type="search" 
+      placeholder="Search..." 
+      bind:value={searchQuery}
+      class="${responsive ? 'w-full sm:max-w-xs' : 'max-w-xs'}"
+    />
+    <Select bind:value={statusFilter}>
+      <SelectTrigger class="${responsive ? 'w-full sm:w-48' : 'w-48'}">
+        <SelectValue placeholder="Filter by status" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="all">All Statuses</SelectItem>
+        <SelectItem value="active">Active</SelectItem>
+        <SelectItem value="pending">Pending</SelectItem>
+        <SelectItem value="inactive">Inactive</SelectItem>
+      </SelectContent>
+    </Select>
+    <Button class="${responsive ? 'w-full sm:w-auto' : ''}">
+      Add New
+    </Button>
+  </div>
+  
+  <div class="${responsive ? 'overflow-x-auto' : ''}">
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Name</TableHead>
+          <TableHead>Status</TableHead>
+          <TableHead>Date</TableHead>
+          <TableHead class="text-right">Actions</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {#each filteredData() as item}
+          <TableRow>
+            <TableCell>{item.name}</TableCell>
+            <TableCell>
+              <Badge variant={item.status === 'active' ? 'default' : item.status === 'pending' ? 'secondary' : 'outline'}>
+                {item.status}
+              </Badge>
+            </TableCell>
+            <TableCell>{item.date}</TableCell>
+            <TableCell class="text-right">
+              <Button variant="ghost" size="sm">Edit</Button>
+              <Button variant="ghost" size="sm">Delete</Button>
+            </TableCell>
+          </TableRow>
+        {/each}
+      </TableBody>
+    </Table>
+  </div>
+</div>`;
+        }
+    };
+    
+    const generator = patterns[pattern];
+    if (!generator) {
+        throw new Error(`Unknown UI pattern: ${pattern}. Available patterns: ${Object.keys(patterns).join(', ')}`);
+    }
+    
+    return await generator();
+}
+
+/**
+ * Generate import statements for components
+ * @param components Array of component names
+ * @returns Import statements string
+ */
+async function generateImports(components: string[]): Promise<string> {
+    const imports: string[] = [];
+    
+    for (const component of components) {
+        const metadata = await registry.getComponent(component);
+        if (metadata && metadata.files.length > 0) {
+            // Extract component exports from index.ts file if available
+            const indexFile = metadata.files.find(f => f.path.endsWith('index.ts'));
+            if (indexFile && indexFile.content) {
+                // Parse exports from index.ts
+                const exportMatches = indexFile.content.matchAll(/export\s*{\s*([^}]+)\s*}/g);
+                for (const match of exportMatches) {
+                    const exports = match[1].split(',').map(e => e.trim()).filter(Boolean);
+                    if (exports.length > 0) {
+                        imports.push(`  import { ${exports.join(', ')} } from "$lib/components/ui/${component}";`);
+                    }
+                }
+            } else {
+                // Fallback to Pascal case import
+                const pascalCase = component.split('-').map(p => p.charAt(0).toUpperCase() + p.slice(1)).join('');
+                imports.push(`  import { ${pascalCase} } from "$lib/components/ui/${component}";`);
+            }
+        }
+    }
+    
+    return imports.join('\n');
+}
+
+/**
+ * Scaffold a new component following shadcn patterns
+ * @param config Component configuration
+ * @returns Scaffolded component code
+ */
+async function scaffoldComponent(config: {
+    name: string;
+    type: 'primitive' | 'composite' | 'layout';
+    baseComponent?: string;
+    variants?: string[];
+    props?: Array<{ name: string; type: string; required?: boolean; default?: string }>;
+}): Promise<string> {
+    const { name, type, baseComponent, variants = ['default'], props = [] } = config;
+    const pascalCase = name.split('-').map(p => p.charAt(0).toUpperCase() + p.slice(1)).join('');
+    
+    let imports = `  import { type HTMLAttributes } from 'svelte/elements';\n  import { cn } from '$lib/utils';\n`;
+    let baseImports = '';
+    
+    if (baseComponent) {
+        const baseMeta = await registry.getComponent(baseComponent);
+        if (baseMeta) {
+            const indexFile = baseMeta.files.find(f => f.path.endsWith('index.ts'));
+            if (indexFile && indexFile.content) {
+                const exportMatches = indexFile.content.matchAll(/export\s*{\s*([^}]+)\s*}/g);
+                for (const match of exportMatches) {
+                    const exports = match[1].split(',').map(e => e.trim()).filter(Boolean);
+                    if (exports.length > 0) {
+                        baseImports = `  import { ${exports.join(', ')} } from '$lib/components/ui/${baseComponent}';\n`;
+                    }
+                }
+            }
+        }
+    }
+    
+    // Build props type
+    const propsType = props.map(p => {
+        const typeStr = p.required ? p.type : `${p.type} | undefined`;
+        const defaultStr = p.default ? ` = ${p.default}` : '';
+        return `    ${p.name}${p.required ? '' : '?'}: ${typeStr};`;
+    }).join('\n');
+    
+    // Build variants object if specified
+    const variantsObj = variants.length > 1 ? `
+  const variants = {
+${variants.map(v => `    ${v}: '${getVariantClasses(v, type)}'`).join(',\n')}
+  };` : '';
+    
+    return `<script lang="ts">
+${imports}${baseImports}
+  
+  type Props = {
+${propsType}
+    variant?: ${variants.map(v => `'${v}'`).join(' | ')};
+    class?: string;
+  } & HTMLAttributes<HTMLDivElement>;
+  
+  let {
+${props.map(p => `    ${p.name}${p.default ? ` = ${p.default}` : ''}`).join(',\n')},
+    variant = 'default',
+    class: className,
+    ...restProps
+  }: Props = $props();
+${variantsObj}
+</script>
+
+${generateComponentTemplate(name, type, baseComponent, variants.length > 1)}
+
+<style>
+  /* Add any component-specific styles here */
+</style>`;
+}
+
+/**
+ * Get variant classes based on variant name and component type
+ */
+function getVariantClasses(variant: string, type: string): string {
+    const baseClasses: Record<string, string> = {
+        primitive: 'inline-flex items-center justify-center',
+        composite: 'flex flex-col gap-4',
+        layout: 'relative w-full'
+    };
+    
+    const variantClasses: Record<string, string> = {
+        default: '',
+        outline: 'border border-input bg-background',
+        ghost: 'hover:bg-accent hover:text-accent-foreground',
+        destructive: 'bg-destructive text-destructive-foreground'
+    };
+    
+    return `${baseClasses[type] || ''} ${variantClasses[variant] || ''}`.trim();
+}
+
+/**
+ * Generate component template based on type
+ */
+function generateComponentTemplate(name: string, type: string, baseComponent?: string, hasVariants: boolean = false): string {
+    const variantClass = hasVariants ? '{variants[variant]}' : '';
+    
+    switch (type) {
+        case 'primitive':
+            return baseComponent ? 
+`<${baseComponent} class={cn(${variantClass ? `${variantClass}, ` : ''}className)} {...restProps}>
+  <slot />
+</${baseComponent}>` :
+`<div class={cn("${getVariantClasses('default', type)}", ${variantClass ? `${variantClass}, ` : ''}className)} {...restProps}>
+  <slot />
+</div>`;
+            
+        case 'composite':
+            return `<div class={cn("${getVariantClasses('default', type)}", ${variantClass ? `${variantClass}, ` : ''}className)} {...restProps}>
+  <slot name="header" />
+  <div class="flex-1">
+    <slot />
+  </div>
+  <slot name="footer" />
+</div>`;
+            
+        case 'layout':
+            return `<div class={cn("${getVariantClasses('default', type)}", ${variantClass ? `${variantClass}, ` : ''}className)} {...restProps}>
+  <slot name="sidebar" />
+  <main class="flex-1">
+    <slot />
+  </main>
+  <slot name="aside" />
+</div>`;
+            
+        default:
+            return `<div class={cn(${variantClass ? `${variantClass}, ` : ''}className)} {...restProps}>
+  <slot />
+</div>`;
+    }
+}
+
 export const axios = {
     githubRaw,
     githubApi,
@@ -723,6 +1114,8 @@ export const axios = {
     getAvailableBlocks, // Kept for compatibility - returns error message
     setGitHubApiKey,
     getGitHubRateLimit,
+    generateUIPattern,
+    scaffoldComponent,
     // Registry functions (new)
     registry,
     // Path constants for easy access

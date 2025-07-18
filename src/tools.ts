@@ -248,6 +248,99 @@ server.tool("list_blocks",
   }
 );
 
+// Tool: compose_ui_pattern - Generate complete UI patterns
+server.tool("compose_ui_pattern",
+  'Generate complete UI patterns using multiple shadcn components',
+  {
+    pattern: z.enum([
+      'login-form',
+      'signup-form',
+      'profile-card',
+      'dashboard-header',
+      'data-table-page',
+      'settings-page',
+      'card-grid',
+      'sidebar-layout',
+      'navbar-with-menu',
+      'footer',
+      'hero-section',
+      'pricing-cards',
+      'contact-form',
+      'search-bar',
+      'notification-center'
+    ]).describe('The UI pattern to generate'),
+    options: z.object({
+      includeState: z.boolean().optional().describe('Include Svelte 5 state management (default: true)'),
+      includeValidation: z.boolean().optional().describe('Include form validation (default: true for forms)'),
+      responsive: z.boolean().optional().describe('Make the pattern responsive (default: true)'),
+      darkMode: z.boolean().optional().describe('Include dark mode support (default: false)')
+    }).optional().describe('Additional options for pattern generation')
+  },
+  async ({ pattern, options = {} }) => {
+    try {
+      const generatedPattern = await axios.generateUIPattern(pattern, options);
+      return {
+        content: [{ 
+          type: "text", 
+          text: generatedPattern
+        }]
+      };
+    } catch (error) {
+      if (error instanceof McpError) {
+        throw error;
+      }
+      
+      throw new McpError(
+        ErrorCode.InternalError,
+        `Failed to generate UI pattern "${pattern}": ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
+  }
+);
+
+// Tool: scaffold_component - Create custom component following shadcn patterns
+server.tool("scaffold_component",
+  'Create a new custom component following shadcn patterns',
+  {
+    name: z.string().describe('Name of the component in kebab-case (e.g., "profile-card")'),
+    type: z.enum(['primitive', 'composite', 'layout']).describe('Component type'),
+    baseComponent: z.string().optional().describe('Existing shadcn component to extend'),
+    variants: z.array(z.string()).optional().describe('Component variants (e.g., ["default", "outline", "ghost"])'),
+    props: z.array(z.object({
+      name: z.string(),
+      type: z.string(),
+      required: z.boolean().optional(),
+      default: z.string().optional()
+    })).optional().describe('Component props')
+  },
+  async ({ name, type, baseComponent, variants, props }) => {
+    try {
+      const scaffoldedComponent = await axios.scaffoldComponent({
+        name,
+        type,
+        baseComponent,
+        variants,
+        props
+      });
+      return {
+        content: [{ 
+          type: "text", 
+          text: scaffoldedComponent
+        }]
+      };
+    } catch (error) {
+      if (error instanceof McpError) {
+        throw error;
+      }
+      
+      throw new McpError(
+        ErrorCode.InternalError,
+        `Failed to scaffold component "${name}": ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
+  }
+);
+
 // Export tools for backward compatibility
 export const tools = {
   'get_component': {
@@ -356,6 +449,101 @@ export const tools = {
       },
     },
   },
+  'compose_ui_pattern': {
+    name: 'compose_ui_pattern',
+    description: 'Generate complete UI patterns using multiple shadcn components',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        pattern: {
+          type: 'string',
+          enum: [
+            'login-form',
+            'signup-form',
+            'profile-card',
+            'dashboard-header',
+            'data-table-page',
+            'settings-page',
+            'card-grid',
+            'sidebar-layout',
+            'navbar-with-menu',
+            'footer',
+            'hero-section',
+            'pricing-cards',
+            'contact-form',
+            'search-bar',
+            'notification-center'
+          ],
+          description: 'The UI pattern to generate',
+        },
+        options: {
+          type: 'object',
+          properties: {
+            includeState: {
+              type: 'boolean',
+              description: 'Include Svelte 5 state management (default: true)',
+            },
+            includeValidation: {
+              type: 'boolean',
+              description: 'Include form validation (default: true for forms)',
+            },
+            responsive: {
+              type: 'boolean',
+              description: 'Make the pattern responsive (default: true)',
+            },
+            darkMode: {
+              type: 'boolean',
+              description: 'Include dark mode support (default: false)',
+            },
+          },
+          description: 'Additional options for pattern generation',
+        },
+      },
+      required: ['pattern'],
+    },
+  },
+  'scaffold_component': {
+    name: 'scaffold_component',
+    description: 'Create a new custom component following shadcn patterns',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        name: {
+          type: 'string',
+          description: 'Name of the component in kebab-case (e.g., "profile-card")',
+        },
+        type: {
+          type: 'string',
+          enum: ['primitive', 'composite', 'layout'],
+          description: 'Component type',
+        },
+        baseComponent: {
+          type: 'string',
+          description: 'Existing shadcn component to extend',
+        },
+        variants: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Component variants (e.g., ["default", "outline", "ghost"])',
+        },
+        props: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              name: { type: 'string' },
+              type: { type: 'string' },
+              required: { type: 'boolean' },
+              default: { type: 'string' },
+            },
+            required: ['name', 'type'],
+          },
+          description: 'Component props',
+        },
+      },
+      required: ['name', 'type'],
+    },
+  },
 };
 
 // Export tool handlers for backward compatibility
@@ -405,5 +593,47 @@ export const toolHandlers = {
   "list_blocks": async ({ category }: { category?: string }) => {
     const blocks = await axios.getAvailableBlocks(category);
     return createSuccessResponse(blocks);
+  },
+  "compose_ui_pattern": async ({ 
+    pattern, 
+    options = {} 
+  }: { 
+    pattern: string, 
+    options?: {
+      includeState?: boolean;
+      includeValidation?: boolean;
+      responsive?: boolean;
+      darkMode?: boolean;
+    }
+  }) => {
+    const generatedPattern = await axios.generateUIPattern(pattern, options);
+    return createSuccessResponse(generatedPattern);
+  },
+  "scaffold_component": async ({
+    name,
+    type,
+    baseComponent,
+    variants,
+    props
+  }: {
+    name: string;
+    type: 'primitive' | 'composite' | 'layout';
+    baseComponent?: string;
+    variants?: string[];
+    props?: Array<{
+      name: string;
+      type: string;
+      required?: boolean;
+      default?: string;
+    }>;
+  }) => {
+    const scaffoldedComponent = await axios.scaffoldComponent({
+      name,
+      type,
+      baseComponent,
+      variants,
+      props
+    });
+    return createSuccessResponse(scaffoldedComponent);
   },
 };
