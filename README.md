@@ -1,6 +1,7 @@
 # Shadcn-Svelte MCP Server
 
 <!-- [![npm version](https://badge.fury.io/js/shadcn-svelte-mcp-server.svg)](https://badge.fury.io/js/shadcn-svelte-mcp-server) -->
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A Model Context Protocol (MCP) server that provides AI assistants with comprehensive access to [shadcn-svelte](https://shadcn-svelte.com/) components, documentation, and metadata. This server enables AI tools like Claude Desktop, Continue.dev, and other MCP-compatible clients to retrieve and work with shadcn-svelte components for Svelte 5 and SvelteKit projects seamlessly.
@@ -50,7 +51,7 @@ shadcn-svelte-mcp-server [options]
 
 Options:
   --github-api-key, -g <token>    GitHub Personal Access Token
-  --help, -h                      Show help message  
+  --help, -h                      Show help message
   --version, -v                   Show version information
 
 Environment Variables:
@@ -66,6 +67,7 @@ Examples:
 ## 🔑 GitHub API Token Setup
 
 **Why do you need a token?**
+
 - Without token: Limited to 60 API requests per hour
 - With token: Up to 5,000 requests per hour
 - Better reliability and faster responses
@@ -73,10 +75,12 @@ Examples:
 ### 📝 Getting Your Token (2 minutes)
 
 1. **Go to GitHub Settings**:
+
    - Visit [GitHub Settings → Developer settings → Personal access tokens → Tokens (classic)](https://github.com/settings/tokens)
    - Or: GitHub Profile → Settings → Developer settings → Personal access tokens
 
 2. **Generate New Token**:
+
    - Click "Generate new token (classic)"
    - Add a note: "shadcn-ui MCP server"
    - **Expiration**: Choose your preference (90 days recommended)
@@ -89,12 +93,14 @@ Examples:
 ### 🚀 Using Your Token
 
 **Method 1: Command Line (Quick testing)**
+
 ```bash
 # npx @jpisnice/shadcn-ui-mcp-server --github-api-key ghp_your_token_here
 node build/index.js --github-api-key ghp_your_token_here
 ```
 
 **Method 2: Environment Variable (Recommended)**
+
 ```bash
 # Add to your shell profile (~/.bashrc, ~/.zshrc, etc.)
 export GITHUB_PERSONAL_ACCESS_TOKEN=ghp_your_token_here
@@ -104,6 +110,7 @@ node build/index.js
 ```
 
 **Method 3: Claude Desktop Configuration**
+
 ```json
 {
   "mcpServers": {
@@ -147,6 +154,7 @@ The MCP server provides these tools for AI assistants:
 ### UI Pattern Tools (New!)
 
 - **`compose_ui_pattern`** - Generate complete UI patterns using multiple components
+
   - Available patterns: login-form, signup-form, profile-card, dashboard-header, data-table-page, settings-page, card-grid, sidebar-layout, navbar-with-menu, footer, hero-section, pricing-cards, contact-form, search-bar, notification-center
   - Options: includeState, includeValidation, responsive, darkMode
 
@@ -174,7 +182,7 @@ The MCP server provides these tools for AI assistants:
 // Generate a login form pattern
 {
   "tool": "compose_ui_pattern",
-  "arguments": { 
+  "arguments": {
     "pattern": "login-form",
     "options": {
       "includeState": true,
@@ -207,7 +215,7 @@ The MCP server provides these tools for AI assistants:
 
 // Get component metadata
 {
-  "tool": "get_component_metadata", 
+  "tool": "get_component_metadata",
   "arguments": { "componentName": "button" }
 }
 ```
@@ -252,13 +260,14 @@ Or with environment variable:
 For [Claude Code](https://github.com/cline/cline) (formerly Cline) VS Code extension, add to your MCP settings:
 
 **Option 1: In VS Code Settings**
+
 1. Open VS Code Settings (Cmd+, on Mac, Ctrl+, on Windows/Linux)
 2. Search for "claude code mcp" or "cline mcp"
 3. Add the server configuration:
 
 ```json
 {
-  "claude-code.mcpServers": {
+  "mcpServers": {
     "shadcn-svelte": {
       "command": "node",
       "args": ["[LOCAL_PATH]/build/index.js"],
@@ -275,7 +284,7 @@ Add to your workspace or user settings:
 
 ```json
 {
-  "claude-code.mcpServers": {
+  "mcpServers": {
     "shadcn-svelte": {
       "command": "node",
       "args": ["/absolute/path/to/shadcn-ui-mcp-server-svelte/build/index.js"],
@@ -288,6 +297,7 @@ Add to your workspace or user settings:
 ```
 
 **Option 3: Using the Claude Code UI**
+
 1. Open Claude Code in VS Code
 2. Click on the settings/gear icon
 3. Navigate to MCP Servers section
@@ -321,16 +331,19 @@ For [Continue.dev](https://continue.dev/), add to your `~/.continue/config.json`
 Once configured, you can ask your AI assistant to:
 
 **Get Components:**
+
 - "Show me the shadcn button component"
 - "Get the source code for the dialog component"
 - "What dependencies does the data-table component have?"
 
 **Generate UI Patterns:**
+
 - "Create a login form using shadcn components"
 - "Generate a responsive dashboard header"
 - "Build a profile card component with Svelte 5"
 
 **Create Custom Components:**
+
 - "Scaffold a new user-avatar component that extends the avatar component"
 - "Create a custom card component with compact and expanded variants"
 - "Build a new layout component for a sidebar navigation"
@@ -351,12 +364,14 @@ After adding the MCP server to your configuration:
 ### Common Issues
 
 **"Rate limit exceeded" errors:**
+
 ```bash
 # Solution: Add GitHub API token
 node build/index.js --github-api-key ghp_your_token_here
 ```
 
 **"Command not found" errors:**
+
 ```bash
 # Solution: Install Node.js 18+ and ensure npx is available
 node --version  # Should be 18+
@@ -364,6 +379,7 @@ npx --version   # Should work
 ```
 
 **Component not found:**
+
 ```bash
 # Check available components first
 # npx @benjaminmodayil/shadcn-svelte-mcp-server
@@ -372,6 +388,7 @@ node build/index.js
 ```
 
 **Network/proxy issues:**
+
 ```bash
 # Set proxy if needed
 export HTTP_PROXY=http://your-proxy:8080
@@ -397,18 +414,21 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🎯 Recent Improvements
 
 ### Enhanced Component Fetching
+
 - **Real-time GitHub Integration**: Components are now fetched directly from the shadcn-svelte GitHub repository
 - **Complete Source Code**: All component files including .svelte files and TypeScript definitions
 - **Smart Caching**: 1-hour TTL cache to balance freshness with API rate limits
 - **Retry Logic**: Automatic retry with exponential backoff for network reliability
 
 ### New UI Pattern Generation
+
 - **Pre-built Patterns**: Generate complete UI patterns like login forms, dashboards, and data tables
 - **Customizable Options**: Control state management, validation, responsiveness, and dark mode
 - **Svelte 5 Syntax**: All patterns use modern Svelte 5 runes and conventions
 - **Intelligent Imports**: Automatically generates correct import statements
 
 ### Component Scaffolding
+
 - **Custom Components**: Create new components following shadcn design patterns
 - **Type Safety**: Full TypeScript support with proper prop types
 - **Variant Support**: Define multiple visual variants for your components
